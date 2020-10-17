@@ -1,0 +1,121 @@
+version: '3.7'
+
+services:
+
+  bodia-sandbox-redis:
+    image: redis:5-alpine
+    restart: unless-stopped
+
+  bodia-sandbox-main-postgresql:
+    image: postgres:11.2-alpine
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB_HOST=${POSTGRES_MAIN_DB_HOST}
+      - POSTGRES_DB_PORT=${POSTGRES_MAIN_DB_PORT}
+      - POSTGRES_DB=${POSTGRES_MAIN_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_MAIN_DB_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_MAIN_DB_PASSWORD}
+    volumes:
+      - bodia-sandbox-postgresql-data:/var/lib/postgresql/data
+
+  bodia-sandbox-search-postgresql:
+    image: dteamdev/postgres-ukrainian-search
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - 6432:5432
+    environment:
+      - POSTGRES_DB_HOST=${POSTGRES_SEARCH_DB_HOST}
+      - POSTGRES_DB_PORT=${POSTGRES_SEARCH_DB_PORT}
+      - POSTGRES_DB=${POSTGRES_SEARCH_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_SEARCH_DB_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_SEARCH_DB_PASSWORD}
+    volumes:
+      - bodia-sandbox-search-postgresql:/var/lib/postgresql/data
+
+  bodia-sandbox-static:
+    build:
+      context: .
+      dockerfile: ./docker/node/Dockerfile
+    restart: "no"
+    env_file:
+      - .env
+    volumes:
+      - static_node_modules:/web/app/node_modules
+      - .:/web/app
+    command: npm run build
+
+  bodia-sandbox-django:
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    image: bodia-django:sandbox      
+    restart: unless-stopped
+    environment:
+      DJANGO_SETTINGS_MODULE: bodia.settings.local
+      prometheus_multiproc_dir: metrics
+    env_file:
+      - .env
+    depends_on:
+      - bodia-sandbox-static
+      - bodia-sandbox-redis
+      - bodia-sandbox-main-postgresql
+      - bodia-sandbox-search-postgresql
+    volumes:
+      - .:/web/app
+    command: sh ./docker/django/gunicorn.sh
+
+  bodia-sandbox-nginx:
+    image: nginx:alpine
+    volumes:
+      - ./docker/sandbox/nginx:/etc/nginx/conf.d
+      - ./assets:/www/static
+      - ./media:/www/media
+      - .:/web/app
+    ports:
+      - 8002:80
+    depends_on:
+      - bodia-sandbox-django
+
+  bodia-sandbox-celery:
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    image: bodia-django:sandbox
+    restart: unless-stopped
+    environment:
+      DJANGO_SETTINGS_MODULE: bodia.settings.local
+      prometheus_multiproc_dir: metrics
+    env_file:
+      - .env
+    depends_on:
+      - bodia-sandbox-redis
+    volumes:
+      - .:/web/app
+    command: ['celery', '-A', 'bodia', 'worker', '-l', 'info']
+
+  bodia-sandbox-celery-beat:
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    restart: unless-stopped
+    environment:
+      DJANGO_SETTINGS_MODULE: bodia.settings.local
+    env_file:
+      - .env
+    depends_on:
+      - bodia-sandbox-static
+      - bodia-sandbox-redis
+      - bodia-sandbox-main-postgresql
+      - bodia-sandbox-search-postgresql
+    volumes:
+      - .:/web/app
+    command: ['celery', '-A', 'bodia', 'beat', '-l', 'info']
+    
+volumes:
+  bodia-sandbox-postgresql-data:
+  bodia-sandbox-search-postgresql:
+  static_node_modules:

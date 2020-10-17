@@ -1,0 +1,116 @@
+version: '3.7'
+
+services:
+
+  bodia-development-redis:
+    image: redis:5-alpine
+    restart: unless-stopped
+    ports:
+    - 6379:6379
+
+  bodia-development-main-postgresql:
+    image: postgres:11.2-alpine
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB_HOST=${POSTGRES_MAIN_DB_HOST}
+      - POSTGRES_DB_PORT=${POSTGRES_MAIN_DB_PORT}
+      - POSTGRES_DB=${POSTGRES_MAIN_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_MAIN_DB_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_MAIN_DB_PASSWORD}
+    volumes:
+      - bodia-development-postgresql-data:/var/lib/postgresql/data
+
+  bodia-development-search-postgresql:
+    image: dteamdev/postgres-ukrainian-search
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - 6432:5432
+    environment:
+      - POSTGRES_DB_HOST=${POSTGRES_SEARCH_DB_HOST}
+      - POSTGRES_DB_PORT=${POSTGRES_SEARCH_DB_PORT}
+      - POSTGRES_DB=${POSTGRES_SEARCH_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_SEARCH_DB_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_SEARCH_DB_PASSWORD}
+    volumes:
+      - bodia-development-search-postgresql:/var/lib/postgresql/data
+
+  bodia-development-static:
+    build:
+      context: .
+      dockerfile: ./docker/node/Dockerfile
+    restart: "no"
+    env_file:
+      - .env
+    volumes:
+      - static_node_modules:/web/app/node_modules
+      - .:/web/app
+    command: npm run build
+
+  bodia-development-main:
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - bodia-development-static
+      - bodia-development-redis
+      - bodia-development-main-postgresql
+      - bodia-development-search-postgresql
+    volumes:
+      - pipenv_cache:/web/app/pipenv_cache
+      - .:/web/app
+    ports:
+      - 8001:8001
+    command: ['python', 'manage.py', 'runserver', '0.0.0.0:8001', '--settings', 'bodia.settings.local']
+  
+  bodia-development-celery:
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    restart: unless-stopped
+    environment:
+      DJANGO_SETTINGS_MODULE: bodia.settings.local
+    env_file:
+      - .env
+    depends_on:
+      - bodia-development-static
+      - bodia-development-redis
+      - bodia-development-main-postgresql
+      - bodia-development-search-postgresql
+    volumes:
+      - pipenv_cache:/web/app/pipenv_cache
+      - .:/web/app
+    command: ['celery', '-A', 'bodia', 'worker', '-l', 'info']
+
+  bodia-development-celery-beat:
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    restart: unless-stopped
+    environment:
+      DJANGO_SETTINGS_MODULE: bodia.settings.local
+    env_file:
+      - .env
+    depends_on:
+      - bodia-development-static
+      - bodia-development-redis
+      - bodia-development-main-postgresql
+      - bodia-development-search-postgresql
+    volumes:
+      - pipenv_cache:/web/app/pipenv_cache
+      - .:/web/app
+    command: ['celery', '-A', 'bodia', 'beat', '-l', 'info']
+
+volumes:
+  bodia-development-postgresql-data:
+  bodia-development-search-postgresql:
+  static_node_modules:
+  pipenv_cache:

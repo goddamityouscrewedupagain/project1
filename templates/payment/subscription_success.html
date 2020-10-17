@@ -1,0 +1,34 @@
+{% extends 'main/base.html' %}
+{% load i18n %}
+{% load static %}
+{% block head_title %}{% trans "Вибір тарифу" %}{% endblock %}
+
+{% block content %}
+  {% include 'main/blocks/categories.html' %}
+<main id="mobile-main" class="inner-tab-content">
+    <div class="inner-wrap">
+        <div class="inner-container">
+            <div class="notification-success-payment notification-success-payment__plan">
+                <h1>успіх</h1>
+                <p>Ви успішно оплатили підписку</p>
+
+                <div class="notification-success-payment__img">
+                    <img src="{% static 'main/imgs/pre_page/bod-395/payment-success.png' %}" alt="">
+                </div>
+
+                <a href="{% url 'main:profile' request.user.username %}"
+                   class="notification-success-payment__btn button-secondary">
+                    перейти до компаній
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock content %}
+
+{#<script>#}
+{#  document.addEventListener("DOMContentLoaded", function () {#}
+{#    document.getElementById("myForm").submit();#}
+{#  })#}
+{#</script>#}

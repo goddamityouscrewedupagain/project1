@@ -1,0 +1,84 @@
+version: '3.7'
+
+services:
+
+  bodia-production-redis:
+    image: redis:5-alpine
+    restart: unless-stopped
+
+  bodia-production-search-postgresql:
+    image: dteamdev/postgres-ukrainian-search
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB_HOST=${POSTGRES_SEARCH_DB_HOST}
+      - POSTGRES_DB_PORT=${POSTGRES_SEARCH_DB_PORT}
+      - POSTGRES_DB=${POSTGRES_SEARCH_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_SEARCH_DB_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_SEARCH_DB_PASSWORD}
+    volumes:
+      - bodia-production-search-postgresql:/var/lib/postgresql/data
+
+  bodia-production-static:
+    build:
+      context: .
+      dockerfile: ./docker/node/Dockerfile
+    restart: "no"
+    env_file:
+      - .env
+    volumes:
+      - static_node_modules:/web/app/node_modules
+      - .:/web/app
+    command: npm run build
+
+  bodia-production-main:
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    image: bodia-django:staging
+    restart: unless-stopped
+    environment:
+      DJANGO_SETTINGS_MODULE: bodia.settings.production
+    env_file:
+      - .env
+    depends_on:
+      - bodia-production-static
+      - bodia-production-redis
+      - bodia-production-search-postgresql
+    volumes:
+      - .:/web/app
+    command: "gunicorn -c conf.d/staging/gunicorn_config.py bodia.wsgi"
+
+  bodia-staging-nginx:
+    image: nginx:alpine
+    volumes:
+      - ./docker/staging/nginx:/etc/nginx/conf.d
+      - ./assets:/www/static
+      - ./media:/www/media
+      - .:/web/app
+    ports:
+      - 8004:80
+    depends_on:
+      - bodia-production-main
+
+  bodia-production-celery:
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    image: bodia-django:production
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: bodia.settings.production
+    command:
+      celery -A bodia worker -B -l info
+    volumes:
+      - .:/web/app
+    depends_on:
+      - bodia-production-redis
+
+volumes:
+  bodia-production-search-postgresql:
+  static_node_modules:

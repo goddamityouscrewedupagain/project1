@@ -1,0 +1,55 @@
+{% extends 'main/base.html' %}
+{% load i18n %}
+{% load static %}
+{% block head_title %}{% trans "Вибір тарифу" %}{% endblock %}
+
+{% block content %}
+  {% include 'main/blocks/categories.html' %}
+
+
+  <main id="mobile-main" class="inner-tab-content">
+    <div class="inner-wrap">
+      <div class="inner-container">
+        <div class="tariff-payment">
+          <h1>Підтвердження Оплати</h1>
+          <p>Ваш тарифний план та сума до сплати:</p>
+
+          <form method="post" class="form">
+            {% csrf_token %}
+            <div class="tariff-payment__price">
+              {{ payment.subscription.subscription_plan }}
+              <strong>
+                {{ payment.subscription.price_per_period.price }}
+              </strong> <sup>₴</sup>
+            </div>
+
+            <div class="form__group form__group-radio">
+              <p class="label-sm">Оберіть спосіб оплати: </p>
+        <input type="radio"
+               name="payment_type"
+               id="id_payment_type_1"
+               value="personal"
+               checked>
+              <label for="id_payment_type_1" class="label">З особистого рахунку</label>
+        <input type="radio"
+               name="payment_type"
+               id="id_payment_type_2"
+               value="liqpay">
+              <label for="id_payment_type_2" class="label">Через платіжну систему LiqPay</label>
+            </div>
+
+            <button type="submit" class="tariff-payment__btn button-secondary">
+              оплатити
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock content %}
+
+{#<script>#}
+{#  document.addEventListener("DOMContentLoaded", function () {#}
+{#    document.getElementById("myForm").submit();#}
+{#  })#}
+{#</script>#}

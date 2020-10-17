@@ -1,0 +1,28 @@
+{% extends 'main/base.html' %}
+{% load i18n %}
+{% load static %}
+{% block head_title %}{% trans "Вибір тарифу" %}{% endblock %}
+
+{% block content %}
+  {% include 'main/blocks/categories.html' %}
+
+
+  <main id="mobile-main" class="inner-tab-content">
+    <div class="inner-wrap">
+      <div class="inner-container">
+        <div class="notification-success-payment">
+          <h1>Ваша оплата пройшла неуспiшно</h1>
+
+          <div class="notification-success-payment__img payment-fail">
+            <img src="{% static 'main/imgs/pre_page/bod-395/payment-fail.png' %}" alt="">
+          </div>
+
+          <a href="{% url 'main:profile' request.user.username %}" class="notification-success-payment__btn button-secondary">
+            в особистий кабінет
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+{% endblock content %}

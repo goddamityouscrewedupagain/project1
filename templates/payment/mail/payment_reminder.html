@@ -1,0 +1,17 @@
+{% load i18n %}
+
+{% autoescape off %}
+    {% if expired %}
+        <p>{% trans 'Ваша підписка завершилась' %}.</p>
+    {% else %}
+        <p>{% trans 'Ваша підписка незабаром завершиться' %}.</p>
+        <p>{% trans 'Залишилось ' %}
+            {{ days }}
+            {% if days == 1 %}
+                {% trans 'день' %}.
+            {% else %}
+                {% trans 'днів' %}.
+            {% endif %}</p>
+        <p>{% trans 'Рекомендуємо її продовжити' %}.</p>
+    {% endif %}
+{% endautoescape %}

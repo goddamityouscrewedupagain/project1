@@ -1,0 +1,57 @@
+{% extends 'main/base.html' %}
+
+{% load static %}
+{% load dseo_tags %}
+{% load main_tags %}
+{% load widget_tweaks %}
+
+{% block meta %}
+  <meta property="og:image:width" content="200">
+  <meta property="og:image:height" content="200">
+  <meta property="og:image" content="{{ company.image.crop.200x200 }}">
+  {% get_meta company %}
+{% endblock %}
+
+{% block icons %}
+  {% include 'main/blocks/icons.html' with skip_logo='True' %}
+{% endblock %}
+
+{% block content %}
+  {% include 'main/blocks/categories.html' %}
+  <main id="mobile-main" class="inner-tab-content">
+    <div class="inner-wrap">
+      <div class="inner-container">
+        <div class="tariff-payment tariff-payment__balance">
+          <h1>Поповнити рахунок</h1>
+          <p>Введіть суму для поповнення особистого рахунку</p>
+
+          <form method="post" class="form" novalidate>
+            {% csrf_token %}
+
+            <div class="form__group">
+              <label for="tariff-balance">Cума</label>
+              <div>
+                <p>
+
+                  {% render_field form.amount %}
+                  <span>Грн</span>
+                </p>
+                <button type="submit" class="tariff-payment__update-btn button-primary">
+                  Поповнити
+                </button>
+              </div>
+
+                  {% if form.errors %}
+                    {{ form.errors.amount }}
+                  {% endif %}
+            </div>
+
+          </form>
+
+          <img src="{% static 'main/imgs/pre_page/bod-567/object.png' %}" alt="payment-plan"
+               class="tariff-payment-plan__img">
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock %}

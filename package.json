@@ -1,0 +1,72 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "Local search engine project.",
+  "main": "index.js",
+  "scripts": {
+    "build": "grunt build",
+    "watch": "grunt watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/dteam.dev/bodia.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/dteam.dev/bodia/issues"
+  },
+  "homepage": "https://gitlab.com/dteam.dev/bodia#readme",
+  "devDependencies": {
+    "@babel/core": "^7.6.4",
+    "@babel/preset-env": "^7.6.3",
+    "@babel/preset-react": "^7.6.3",
+    "angular-trix": "^1.0.2",
+    "autoprefixer": "^9.7.0",
+    "babel-loader": "^8.0.6",
+    "babel-preset-es2015": "^6.24.1",
+    "grunt": "^1.0.4",
+    "grunt-babel": "^8.0.0",
+    "grunt-cli": "^1.3.2",
+    "grunt-combine-media-queries": "^1.0.20",
+    "grunt-concat-css": "^0.3.2",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-cssmin": "^3.0.0",
+    "grunt-contrib-uglify": "^4.0.1",
+    "grunt-contrib-watch": "^1.1.0",
+    "grunt-css-url-rewrite": "^0.3.5",
+    "grunt-postcss": "^0.9.0",
+    "grunt-remove-comments": "^0.1.6",
+    "grunt-sass": "^3.1.0",
+    "grunt-strip-css-comments": "^1.3.0",
+    "load-grunt-tasks": "^5.1.0",
+    "node-sass": "^4.13.0"
+  },
+  "dependencies": {
+    "@amcharts/amcharts4": "^4.9.37",
+    "@amcharts/amcharts4-fonts": "^4.0.1",
+    "@fancyapps/fancybox": "^3.5.7",
+    "angular": "^1.7.5",
+    "angular-cookies": "^1.7.5",
+    "angular-messages": "^1.7.5",
+    "angular-perfect-scrollbar": "^0.2.0",
+    "angular-sanitize": "^1.7.5",
+    "angular-ui-notification": "^0.3.6",
+    "bootstrap": "^4.1.3",
+    "css-loader": "^3.2.0",
+    "file-upload-with-preview": "^2.1.2",
+    "jquery": "^3.4.1",
+    "js-cookie": "^2.2.1",
+    "jssocials": "^1.4.0",
+    "lodash": "^4.17.15",
+    "notyf": "^3.7.0",
+    "overlayscrollbars": "^1.12.0",
+    "script-loader": "^0.7.2",
+    "style-loader": "^1.0.0",
+    "tabbyjs": "^12.0.1",
+    "toastify-js": "^1.7.0",
+    "vanilla-lazyload": "^12.0.0",
+    "webpack-dev-server": "^3.9.0"
+  }
+}

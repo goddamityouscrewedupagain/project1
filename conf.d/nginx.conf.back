@@ -1,0 +1,45 @@
+server {
+    server_name         bodia.sandbox.dteam.dev;
+    client_max_body_size 120m;
+    large_client_header_buffers 8 128k;
+    access_log off;
+
+    location / {
+        proxy_pass         http://unix:/web/bodia/gunicorn.sock;
+        proxy_set_header   Host             $host;
+        proxy_set_header   X-Real-IP        $remote_addr;
+        proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+    }
+
+    listen 8001; # managed by Certbot
+    #ssl_certificate /etc/letsencrypt/live/bodia.online/fullchain.pem; # managed by Certbot
+    #ssl_certificate_key /etc/letsencrypt/live/bodia.online/privkey.pem; # managed by Certbot
+    #include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    #ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+
+#server {
+#    if ($host = www.bodia.online) {
+#        return 301 https://bodia.online$request_uri;
+#    } # managed by Certbot
+#
+#    server_name          www.bodia.online;
+#    return 404; # managed by Certbot
+#
+##    listen 443 ssl; # managed by Certbot
+#    ssl_certificate /etc/letsencrypt/live/bodia.online/fullchain.pem; # managed by Certbot
+#    ssl_certificate_key /etc/letsencrypt/live/bodia.online/privkey.pem; # managed by Certbot
+#    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+#    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+#
+#
+#}
+
+server {
+    if ($host = www.bodia.sandbox.dteam.dev) {
+        return 301 https://bodia.sandbox.dteam.dev$request_uri;
+    } # managed by Certbot
+    listen               8001;
+    server_name          www.bodia.sandbox.dteam.dev;
+    return 404; # managed by Certbot
+}
